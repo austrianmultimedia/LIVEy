@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+	<!-- Developer: Raphael Klein - http://austrianmultimedia.at/ -->
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <title>PRESENTER</title>
+	    <link rel="stylesheet" type="text/css" href="style.css">
+	    <script type="text/javascript" src="jquery-1.12.4.min.js"></script>
+
+	    <script type="text/javascript">
+	    	/* =============================================================================== */
+	    	/* SERVICE WORKER FUNCTIONS ---------------------------*/
+			if (!navigator.serviceWorker || !navigator.serviceWorker.register) {
+		        console.log("This browser doesn't support service workers");
+		        // return;
+		    }
+
+		    // Listen to messages from service workers.
+		    navigator.serviceWorker.addEventListener('message', function(event) {
+		    	var parts = event.data.split(':');
+
+		    	var d = new Date();
+		    	var now = d.toLocaleDateString()+' '+d.toLocaleTimeString();
+
+		    	if (parts[1] == 'is happy') {
+		    		var css = 'class="green"';
+		    	}
+		    	if (parts[1] == 'technical problems') {
+		    		var css = 'class="technicalissues"';
+		    	}
+		    	if (parts[1] == 'the topic is empty') {
+		    		var css = 'class="emptytopic"';
+		    	}
+		    	$("#messages").prepend('<li><span class="ts">'+now+'</span><span class="client">'+parts[0]+'</span><span '+css+'>'+parts[1]+'</li>');
+
+
+		    });
+
+		    // Register service worker
+            if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register("service-worker.js")
+	            .then(function(registration) {
+	                console.log("Service worker registered, scope: " + registration.scope);
+	                // console.log("Refresh the page to talk to it.");
+	                // If we want to, we might do `location.reload();` so that we'd be controlled by it
+	                $('#messages').append('<li><span>---</span>PLEASE reload this page once. To participate, visit: <span class="system"><a href="'+registration.scope+'" target="_blank">'+registration.scope+'</a></span></li>');
+	                
+	            })
+	            .catch(function(error) {
+	                console.log("Service worker registration failed: " + error.message);
+	            });
+			}
+            $(document).ready(function() {
+            	console.log("jquery ready function"); 
+            	$('#start').click(function(){
+            		location.reload();
+            		$('#log').show();
+            	});
+            	$('#close a').click(function(){
+            		$('#description').slideUp(500);
+            		$('#desc-min').slideDown(500);
+            	});
+            	$('#desc-min').click(function() {
+            		$('#desc-min').slideUp(500);
+            		$('#description').slideDown(500);
+            	});
+
+				function log(msg) {
+					var fragment = document.createDocumentFragment();
+					fragment.appendChild(document.createTextNode(msg));
+					fragment.appendChild(document.createElement('br'));
+					document.querySelector("#log").appendChild(fragment);
+				}    
+            });
+	    </script>
+	</head>
+	<body>
+		<div class="container"> 
+			<h1>LIVEy</h1>
+			<div id="desc-min"><a>Info</a></div>
+			<div id="description">
+				<p>
+				In Live TV- or radio broadcast I often run into the problem, that I can not talk to my presenter or to one of my guests. Sometimes because of technical limitations, sometimes because the presenter is still talking. <br />Some time I heard an episode of <a href="http://metaebene.me/" target="_blank">Tim Pritlove's</a> podcast <a href="http://freakshow.fm/" target="_blank">Freakshow</a>. He talked about his wish to have a tool, providing similar features. That's why I started coding... <br /><br />Maybe LIVEy does what he needed, maybe not. But for me it is the first step to a useful tool for my work. <br /><a href="http://www.austrianmultimedia.at/?page_id=100" target="_blank">Give me feedback!</a>
+				</p>
+				<div id="close"><a>close</a></div>
+			</div> <!-- description -->
+
+			<!-- <button id="start">START Listening</button> -->
+	        <div id="log">
+		        <h3>Log:</h3>
+		        <ul id="messages"></ul>
+		    </div>
+	    </div> <!-- container -->
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+    <!-- Developer: Raphael Klein - http://austrianmultimedia.at/ -->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Service Worker - Client 1</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script type="text/javascript" src="jquery-1.12.4.min.js"></script>
+    </head>
+    <body>
+        <script>
+            var mynick;
+            if('serviceWorker' in navigator){
+                navigator.serviceWorker.addEventListener('message', function(event){
+                    console.log(event.data);
+                });
+            }
+            function send_message_to_sw(msg){
+                navigator.serviceWorker.controller.postMessage(msg);
+            }
+
+            // timer 
+            var clock;
+            var clicked = false;
+            var sec = 0;
+            function startClock() {
+                if (clicked === false) {
+                    clock = setInterval("stopWatch()", 1000);
+                    clicked = true;
+                }
+                else if (clicked === true) {
+                }
+            }
+            function stopWatch() {
+                sec++;
+                $('#timerdiv').fadeIn(500);
+                document.getElementById("timer").innerHTML = ('0' + sec).slice(-2)+"''";
+            }
+            function stopClock() {
+                window.clearInterval(clock);
+                sec = 0;
+                document.getElementById("timer").innerHTML=0;
+                clicked = false;
+                $('#timerdiv').hide();
+            }
+            
+            /* =============================================================================== */
+            $(document).ready(function() {
+                $('#nick').focus();
+
+                $('#form-nick').submit(function(){
+                    var form = $('#form-nick');
+                    var data = form.serialize();
+                    $.post('nicky.php', data, function(response) {
+                      if (response) {
+                            mynick = response;
+                            $('#nicky').show();
+                            $('#nickname').text(mynick);
+                            $('#form-nick').hide();
+                            $('.blue, .red, .lightblue').fadeIn(100);
+                      } else {
+                          
+                      }
+                    });
+                    return false;           
+                });       
+
+
+                var bluewilltalk = false, redwilltalk = false, lightbluewilltalk = false;
+                $('#blue').click(function(){
+                    if (bluewilltalk==false) { //button wasn't yet pressed and timer is not running
+                        stopClock();
+                        $('#timer').show();
+                        send_message_to_sw(mynick+':wanna talk');
+                        $(this).addClass("pushed");
+                        bluewilltalk = true;
+                        startClock();
+                    } else {
+                        stopClock();
+                        $('#timer').hide();
+                        send_message_to_sw(mynick+":is happy");
+                        $(this).removeClass("pushed");    
+                        bluewilltalk = false;
+                    }
+                });
+                $('#red').click(function(){
+                    if (redwilltalk==false) { //button wasn't yet pressed and timer is not running
+                        stopClock();
+                        send_message_to_sw(mynick+':technical problems');
+                        $(this).addClass("pushed");
+                        redwilltalk = true;
+                        startClock();
+                    } else {
+                        stopClock();
+                        send_message_to_sw(mynick+":is happy");
+                        $(this).removeClass("pushed");    
+                        redwilltalk = false;
+                    }
+                });
+                $('#lightblue').click(function(){
+                    if (lightbluewilltalk==false) { //button wasn't yet pressed and timer is not running
+                        stopClock();
+                        send_message_to_sw(mynick+':the topic is empty');
+                        $(this).addClass("pushed");
+                        lightbluewilltalk = true;
+                        startClock();
+                    } else {
+                        stopClock();
+                        send_message_to_sw(mynick+":is happy");
+                        $(this).removeClass("pushed");    
+                        lightbluewilltalk = false;
+                    }
+                });
+
+
+            });
+        </script>
+
+        <div class="container"> 
+            <div class="section group">
+                <div class="col span_1_of_2">
+                    <div id="nicky">Nickname: <span id="nickname"></span></div>
+                    <form id="form-nick" name="form-nick" method="post" action="">
+                        <div class="formelement">
+                            <label name="labelnick" for="nick">Nickname:</label>
+                            <input type="text" id="nick" name="nick">
+                            <button type="submit">OK</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col span_1_of_2">
+                    <div id="timerdiv">Timer: <span id="timer"></span></div>
+                </div>
+            </div>
+
+            <div class="section group">
+                <div class="col span_1_of_3">
+                    <button type="button" class="button blue" id="blue">I wanna talk...</button>
+                </div>
+                <div class="col span_1_of_3">
+                    <button type="button" class="button red" id="red">Technical issues...</button>
+                </div>
+                <div class="col span_1_of_3">
+                    <button type="button" class="button lightblue" id="lightblue">Topic is empty...</button>
+                </div>
+            </div>
+        </div> <!-- container -->
+
+
+    </body>
+</html>
